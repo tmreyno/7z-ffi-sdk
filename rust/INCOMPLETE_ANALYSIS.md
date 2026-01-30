@@ -179,7 +179,7 @@ pub fn sevenzip_compress_resume(...)
 ### For 1.0 Release
 📋 **RECOMMENDED ADDITIONS**:
 1. **Integration tests** (HIGH PRIORITY)
-   - Ensures reliability
+   - Helps reliability
    - Prevents regressions
    - ~2-3 hours work
 

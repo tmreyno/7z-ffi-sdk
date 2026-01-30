@@ -12,7 +12,7 @@ The standard `create_archive()` loads entire files into memory, which will cause
 // ❌ UNSAFE for large files - loads everything into RAM
 sz.create_archive("output.7z", &["/path/to/large/folder"], level, None)?;
 
-// ✅ SAFE for any size - uses 64MB streaming chunks  
+//  SAFE for any size - uses 64MB streaming chunks  
 let mut opts = StreamOptions::default();
 opts.chunk_size = 64 * 1024 * 1024;  // 64MB chunks
 sz.create_archive_streaming("output.7z", &["/path/to/large/folder"], level, Some(&opts), None)?;

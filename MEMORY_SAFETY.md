@@ -18,7 +18,7 @@ sz.create_archive("output.7z", &["/path/to/large/folder"], level, None)?;
 
 **Safe Usage**: Only for files < 1GB total
 
-### 2. `create_archive_streaming()` - STREAMING COMPRESSION ✅ Use for large files
+### 2. `create_archive_streaming()` - STREAMING COMPRESSION Use for large files
 
 ```rust
 // SAFE: Uses 64MB chunks, never loads entire files
@@ -47,7 +47,7 @@ sz.create_archive_streaming(
 | Method | large Input | Peak RAM Usage | Safe? |
 |--------|------------|----------------|-------|
 | `create_archive()` | large | ~large+ | ❌ NO |
-| `create_archive_streaming()` | large | ~400MB | ✅ YES |
+| `create_archive_streaming()` | large | ~400MB | YES |
 
 ## When to Use Each Method
 
@@ -69,7 +69,7 @@ sz.create_archive_streaming(
 | Rust Method | C Function | Memory Safe |
 |-------------|------------|-------------|
 | `create_archive()` | `sevenzip_create_7z()` | ❌ No |
-| `create_archive_streaming()` | `sevenzip_create_7z_streaming()` | ✅ Yes |
+| `create_archive_streaming()` | `sevenzip_create_7z_streaming()` | Yes |
 
 ## Example: Safe large Compression
 
@@ -102,7 +102,7 @@ fn compress_large_files(input_path: &str, output_path: &str) -> Result<(), seven
         }))
     )?;
     
-    println!("\n✓ Compression complete!");
+    println!("\n Compression complete!");
     Ok(())
 }
 ```

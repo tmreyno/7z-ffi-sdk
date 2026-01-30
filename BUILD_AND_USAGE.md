@@ -288,9 +288,9 @@ tar czf sevenzip-ffi-v1.2.0-macos-arm64.tar.gz dist/
 
 ### Platform Support
 
-- ✅ macOS (ARM64 and x86_64)
-- ✅ Linux (glibc-based)
-- ✅ Windows (MSVC toolchain)
+- macOS (ARM64 and x86_64)
+- Linux (glibc-based)
+- Windows (MSVC toolchain)
 
 ## Features
 

@@ -193,7 +193,7 @@ When you set level=1 and let the SDK optimize, you get:
 ## Why This Works Better Than Manual Settings
 
 ### 1. **Consistency**
-The SDK maintains proven relationships between parameters:
+The SDK maintains documented relationships between parameters:
 - Dictionary size matches block size needs
 - Match cycles scale with fast bytes
 - Thread distribution optimizes for the algorithm type
@@ -213,7 +213,7 @@ The SDK knows:
 The SDK adapts to constraints:
 - Reduces dictionary for small files
 - Adjusts block count based on file size
-- Ensures block size is never smaller than dictionary
+- Block size is never smaller than dictionary
 
 ## Performance Impact
 
@@ -282,12 +282,12 @@ sz.create_archive_streaming(
 ## Summary
 
 **SDK auto-optimization gives you:**
-- ✅ Proven, tested parameter combinations
-- ✅ Level-appropriate performance characteristics
-- ✅ Intelligent threading distribution
-- ✅ Automatic adaptations for file size and constraints
-- ✅ Cleaner, more maintainable code
-- ✅ Future-proof (benefits from SDK improvements)
+- Tested parameter combinations
+- Level-appropriate performance characteristics
+- Intelligent threading distribution
+- Automatic adaptations for file size and constraints
+- Cleaner, more maintainable code
+- Future-proof (benefits from SDK improvements)
 
 **You only need to specify:**
 - Compression level (0-9)

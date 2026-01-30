@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     split_file("output.7z", 4 * 1024 * 1024 * 1024)?;
     
     // Result: output.7z.part001, output.7z.part002, etc.
-    println!("✓ Archive created and split!");
+    println!("Archive created and split!");
     
     Ok(())
 }
@@ -70,11 +70,11 @@ sz.extract("output.7z", "output_dir")?;
 
 ## Why This Approach?
 
-1. **✅ Works immediately** - No complex format implementation needed
-2. **✅ Universal compatibility** - Standard 7z format, works with all tools
-3. **✅ Simple** - Just split bytes, rejoin bytes
-4. **✅ Reliable** - No custom format, no compatibility issues
-5. **✅ Flexible** - Choose any chunk size
+1. **Works immediately** - No complex format implementation needed
+2. **Universal compatibility** - Standard 7z format, works with all tools
+3. **Simple** - Just split bytes, rejoin bytes
+4. **Reliable** - No custom format, no compatibility issues
+5. **Flexible** - Choose any chunk size
 
 ## Performance
 
@@ -152,7 +152,7 @@ sz.create_archive_streaming(
 // Output: output.7z.001, output.7z.002, output.7z.003, ...
 ```
 
-**Status**: ✅ Complete - 7-Zip compatible
+**Status**: Complete - 7-Zip compatible
 
 ## Real-World Example
 
@@ -179,7 +179,7 @@ fn backup_database() -> Result<(), Box<dyn std::error::Error>> {
     println!("Splitting into 4GB parts...");
     split_file("/backups/db_backup.7z", 4 * 1024 * 1024 * 1024)?;
     
-    println!("✓ Backup complete!");
+    println!("Backup complete!");
     println!("Transfer the .part files to your backup location.");
     
     Ok(())
@@ -214,9 +214,9 @@ The split operation needs space for both the full archive and the parts. If disk
 
 ## Summary
 
-✅ **large files supported**  
-✅ **Native multi-volume archives**  
-✅ **7-Zip compatible**  
-✅ **Memory-efficient streaming**
+**large files supported**  
+**Native multi-volume archives**  
+**7-Zip compatible**  
+**Memory-efficient streaming**
 
 Happy compressing! 🎉

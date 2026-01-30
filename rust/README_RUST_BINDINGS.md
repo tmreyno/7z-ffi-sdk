@@ -407,7 +407,7 @@ Contributions are welcome! Please:
 **READY**
 
 All features tested:
-- 10/10 integration tests passing
+- integration tests available
 - Full encryption support
 - 7-Zip compatibility checked
 - Memory safety validated

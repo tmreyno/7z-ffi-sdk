@@ -2,21 +2,21 @@
 
 **Last Updated:** January 28, 2026
 
-## ✅ WORKING
+## WORKING
 
 7z archive creation is now **compatible with official 7-Zip** (tested with 7zz v25.01).
 
 ## What Works
 
-### Standard 7z Archive Creation ✅
+### Standard 7z Archive Creation
 
-- ✅ Single file archives
-- ✅ Multi-file archives  
-- ✅ Split/multi-volume archives (.7z.001, .7z.002, etc.)
-- ✅ LZMA2 compression with configurable levels
-- ✅ Files of any size (tested up to 100MB+)
-- ✅ Password encryption
-- ✅ Progress callbacks
+- Single file archives
+- Multi-file archives  
+- Split/multi-volume archives (.7z.001, .7z.002, etc.)
+- LZMA2 compression with configurable levels
+- Files of any size (tested up to 100MB+)
+- Password encryption
+- Progress callbacks
 
 ### API Examples
 
@@ -47,12 +47,12 @@ sz.create_archive("archive.7z", &["file1.txt", "file2.txt"], CompressionLevel::N
 
 All archives pass `7zz t` (official 7-Zip test):
 
-- ✅ 16KB random file
-- ✅ 1MB random file
-- ✅ 10MB random file
-- ✅ 100MB random file
-- ✅ Multiple files per archive
-- ✅ Split archives
+- 16KB random file
+- 1MB random file
+- 10MB random file
+- 100MB random file
+- Multiple files per archive
+- Split archives
 
 ## Bugs Fixed
 
