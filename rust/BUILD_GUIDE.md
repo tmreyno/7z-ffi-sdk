@@ -106,8 +106,8 @@ cargo doc --open
 # Complete demo (shows all features)
 cargo run --example complete_demo
 
-# Forensic archiver CLI
-cargo run --example forensic_archiver -- --help
+# Archive tool CLI
+cargo run --example archive_tool -- --help
 
 # Encryption example
 cargo run --example encryption_example

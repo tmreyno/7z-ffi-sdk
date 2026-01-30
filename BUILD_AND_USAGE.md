@@ -178,8 +178,8 @@ fn advanced_usage() -> Result<(), Box<dyn std::error::Error>> {
 ```bash
 cd /path/to/sevenzip-ffi
 
-# Forensic archiver
-./build/examples/forensic_archiver compress output.7z /path/to/files --password
+# Archive tool
+./build/examples/archive_tool compress output.7z /path/to/files --password
 
 # Test encryption
 ./build/examples/test_encryption
@@ -195,8 +195,8 @@ cd /path/to/sevenzip-ffi/rust
 # Feature demonstration (all features)
 cargo run --release --example feature_demo
 
-# Forensic archiver
-cargo run --release --example forensic_archiver
+# Archive tool
+cargo run --release --example archive_tool
 
 # Encryption example
 cargo run --release --example encryption_example
@@ -245,7 +245,7 @@ cp build/lib7z_ffi.a dist/lib/
 cp include/7z_ffi.h dist/include/
 
 # Copy examples
-cp build/examples/forensic_archiver dist/examples/
+cp build/examples/archive_tool dist/examples/
 cp build/examples/test_encryption dist/examples/
 
 # Copy Rust crate (entire directory)

@@ -8,16 +8,16 @@ A comprehensive SDK for 7z archive operations with both C and Rust interfaces, u
 
 **For files larger than 1GB, use `create_archive_streaming()` instead of `create_archive()`!**
 
-The standard `create_archive()` loads entire files into memory, which will cause system failure with large inputs (e.g., 82GB evidence directories). The streaming API uses 64MB chunks and is safe for any file size.
+The standard `create_archive()` loads entire files into memory, which will cause system failure with large inputs. The streaming API uses 64MB chunks and is safe for any file size.
 
 ```rust
 // ❌ UNSAFE for large files - loads everything into RAM
-sz.create_archive("output.7z", &["/path/to/82gb/folder"], level, None)?;
+sz.create_archive("output.7z", &["/path/to/large/folder"], level, None)?;
 
 // ✅ SAFE for any size - uses 64MB streaming chunks  
 let mut opts = StreamOptions::default();
 opts.chunk_size = 64 * 1024 * 1024;  // 64MB chunks
-sz.create_archive_streaming("output.7z", &["/path/to/82gb/folder"], level, Some(&opts), None)?;
+sz.create_archive_streaming("output.7z", &["/path/to/large/folder"], level, Some(&opts), None)?;
 ```
 
 📖 See [MEMORY_SAFETY.md](MEMORY_SAFETY.md) for detailed guidance.

@@ -46,14 +46,14 @@ src/
 
 **Renamed complete examples to cleaner names:**
 - ✅ `complete_demo.rs` → `demo.rs` (167 lines)
-- ✅ `forensic_archiver_example.rs` → `forensic_archiver.rs` (140 lines)
+- ✅ `archive_tool_example.rs` → `archive_tool.rs` (140 lines)
 - ✅ `encryption_example.rs` (145 lines) - kept name
 
 **Final examples structure:**
 ```
 examples/
 ├── demo.rs                # Comprehensive feature demo (167 lines)
-├── forensic_archiver.rs   # Production CLI tool (140 lines)
+├── archive_tool.rs   # Production CLI tool (140 lines)
 └── encryption_example.rs  # Encryption showcase (145 lines)
 ```
 
@@ -66,7 +66,7 @@ examples/
 - Changed lib path: `src/lib_complete.rs` → `src/lib.rs`
 - Updated example names:
   - `complete_demo` → `demo`
-  - `forensic_archiver_example` → `forensic_archiver`
+  - `archive_tool_example` → `archive_tool`
   - `encryption_example` → `encryption`
 
 ### Code Fixes
@@ -122,7 +122,7 @@ cargo build --release
 
 # Run examples
 cargo run --example demo
-cargo run --example forensic_archiver
+cargo run --example archive_tool
 cargo run --example encryption
 
 # Generate documentation
@@ -170,18 +170,18 @@ If you were using the old file names in documentation or scripts:
 | `archive_complete.rs` | `archive.rs` |
 | `lib_complete.rs` | `lib.rs` |
 | `complete_demo.rs` | `demo.rs` |
-| `forensic_archiver_example.rs` | `forensic_archiver.rs` |
+| `archive_tool_example.rs` | `archive_tool.rs` |
 | `Cargo_complete.toml` | `Cargo.toml` |
 
 **Example command updates:**
 ```bash
 # Old
 cargo run --example complete_demo
-cargo run --example forensic_archiver_example
+cargo run --example archive_tool_example
 
 # New
 cargo run --example demo
-cargo run --example forensic_archiver
+cargo run --example archive_tool
 ```
 
 ## Summary

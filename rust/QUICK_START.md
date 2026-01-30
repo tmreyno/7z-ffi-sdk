@@ -240,17 +240,17 @@ This demonstrates:
 - ✅ Direct encryption
 - ✅ Single file compression
 
-### Run Forensic Archiver
+### Run Archive Tool
 
 ```bash
 # Compress with encryption
-cargo run --example forensic_archiver -- compress test.7z /path/to/data password
+cargo run --example archive_tool -- compress test.7z /path/to/data password
 
 # Extract
-cargo run --example forensic_archiver -- extract test.7z ./output password
+cargo run --example archive_tool -- extract test.7z ./output password
 
 # Test integrity
-cargo run --example forensic_archiver -- test test.7z password
+cargo run --example archive_tool -- test test.7z password
 ```
 
 ### Run Encryption Example

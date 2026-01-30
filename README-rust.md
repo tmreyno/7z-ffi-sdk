@@ -82,7 +82,7 @@ use seven_zip::encryption_native::EncryptionContext;
 let ctx = EncryptionContext::new("strong_password")?;
 
 // Encrypt data
-let plaintext = b"Secret forensic evidence";
+let plaintext = b"Secret secret data";
 let ciphertext = ctx.encrypt(plaintext)?;
 
 // Decrypt data

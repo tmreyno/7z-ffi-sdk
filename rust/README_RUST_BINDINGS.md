@@ -224,13 +224,13 @@ match sz.extract("archive.7z", "output") {
 cargo run --example complete_demo
 ```
 
-### Forensic Archiver
+### Archive Tool
 ```bash
 # Compress with encryption
-cargo run --example forensic_archiver -- compress evidence.7z /path/to/data password
+cargo run --example archive_tool -- compress archive.7z /path/to/data password
 
 # Extract
-cargo run --example forensic_archiver -- extract evidence.7z ./output password
+cargo run --example archive_tool -- extract archive.7z ./output password
 ```
 
 ### Encryption Example
@@ -413,4 +413,4 @@ All features tested and verified:
 - Memory safety validated
 - Performance benchmarked
 
-Ready for forensic evidence archival, secure backup, and production use!
+Ready for secret data archival, secure backup, and production use!

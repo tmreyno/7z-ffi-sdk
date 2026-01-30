@@ -61,7 +61,7 @@ Complete, production-ready Rust bindings for the 7z FFI SDK have been implemente
    - Educational output
    - Automatic cleanup
 
-7. **rust/examples/forensic_archiver_example.rs** (140 lines)
+7. **rust/examples/archive_tool_example.rs** (140 lines)
    - Production CLI tool
    - Compress/extract/test commands
    - 8-thread compression
@@ -281,7 +281,7 @@ cargo test
 ### 4. Run Examples
 ```bash
 cargo run --example complete_demo
-cargo run --example forensic_archiver
+cargo run --example archive_tool
 cargo run --example encryption_example
 ```
 
@@ -349,7 +349,7 @@ Typical performance on modern hardware (Apple M1/M2, Intel/AMD):
 
 ### Examples
 1. **complete_demo.rs** - All features demonstration
-2. **forensic_archiver_example.rs** - Production CLI tool
+2. **archive_tool_example.rs** - Production CLI tool
 3. **encryption_example.rs** - Educational encryption showcase
 
 ## Ecosystem Integration
@@ -440,7 +440,7 @@ The Rust bindings for the 7z FFI SDK are **COMPLETE and PRODUCTION READY**.
 
 ### Ready For
 - ✅ Production use
-- ✅ Forensic applications
+- ✅ Large file applications
 - ✅ Secure archival
 - ✅ Integration into Rust projects
 - ✅ Publication to crates.io

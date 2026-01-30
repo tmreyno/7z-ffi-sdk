@@ -8,11 +8,11 @@ The 7z FFI SDK provides two compression APIs with **very different memory charac
 
 ```rust
 // WARNING: This loads entire files into RAM!
-sz.create_archive("output.7z", &["/path/to/82gb/folder"], level, None)?;
+sz.create_archive("output.7z", &["/path/to/large/folder"], level, None)?;
 ```
 
 **Problem**: This function reads entire files into memory before compression.
-- For an 82GB evidence directory, this will attempt to allocate ~82GB of RAM
+- For an large data directory, this will attempt to allocate ~large of RAM
 - Will cause system failure, swap thrashing, or OOM killer activation
 - macOS will become unresponsive and may force a reboot
 
@@ -28,7 +28,7 @@ opts.split_size = 8 * 1024 * 1024 * 1024;  // 8GB split volumes
 
 sz.create_archive_streaming(
     "output.7z",
-    &["/path/to/82gb/folder"],
+    &["/path/to/large/folder"],
     CompressionLevel::Normal,
     Some(&opts),
     Some(progress_callback)
@@ -44,10 +44,10 @@ sz.create_archive_streaming(
 
 ## Memory Comparison
 
-| Method | 82GB Input | Peak RAM Usage | Safe? |
+| Method | large Input | Peak RAM Usage | Safe? |
 |--------|------------|----------------|-------|
-| `create_archive()` | 82GB | ~82GB+ | ❌ NO |
-| `create_archive_streaming()` | 82GB | ~400MB | ✅ YES |
+| `create_archive()` | large | ~large+ | ❌ NO |
+| `create_archive_streaming()` | large | ~400MB | ✅ YES |
 
 ## When to Use Each Method
 
@@ -59,7 +59,7 @@ sz.create_archive_streaming(
 
 ### Use `create_archive_streaming()` for:
 - Large files (any size)
-- Forensic evidence (82GB+)
+- Large files (large+)
 - Production deployments
 - Split archive creation
 - Progress monitoring needs
@@ -71,12 +71,12 @@ sz.create_archive_streaming(
 | `create_archive()` | `sevenzip_create_7z()` | ❌ No |
 | `create_archive_streaming()` | `sevenzip_create_7z_streaming()` | ✅ Yes |
 
-## Example: Safe 82GB Compression
+## Example: Safe large Compression
 
 ```rust
 use seven_zip::{SevenZip, CompressionLevel, StreamOptions};
 
-fn compress_evidence(input_path: &str, output_path: &str) -> Result<(), seven_zip::Error> {
+fn compress_large_files(input_path: &str, output_path: &str) -> Result<(), seven_zip::Error> {
     let sz = SevenZip::new()?;
     
     let mut opts = StreamOptions::default();
@@ -107,9 +107,9 @@ fn compress_evidence(input_path: &str, output_path: &str) -> Result<(), seven_zi
 }
 ```
 
-## Configuration for 82GB Evidence
+## Recommended Settings for Large Archives
 
-Recommended settings for forensic archival:
+Recommended settings for large file archival:
 
 ```rust
 let mut opts = StreamOptions::default();
@@ -121,7 +121,7 @@ opts.solid = true;                        // Better compression
 
 **Expected Performance**:
 - Compression speed: ~20-50 MB/s (depends on data type)
-- Time for 82GB: ~30-60 minutes
+- Time for large: ~30-60 minutes
 - Output size: ~40-60% of input (depends on data compressibility)
 - Memory usage: ~400-500MB peak
 
@@ -130,7 +130,7 @@ opts.solid = true;                        // Better compression
 ```bash
 # Monitor memory usage in another terminal
 while true; do
-    ps aux | grep forensic_archiver | grep -v grep | awk '{print $6/1024 " MB"}'
+    ps aux | grep archive_tool | grep -v grep | awk '{print $6/1024 " MB"}'
     sleep 5
 done
 ```
@@ -148,10 +148,10 @@ If the system became unresponsive during compression:
    ```
 3. Use the streaming API instead:
    ```bash
-   cargo run --release --example forensic_archiver -- compress output.7z /path/to/input
+   cargo run --release --example archive_tool -- compress output.7z /path/to/input
    ```
 
 ## Updated: January 29, 2026
 
-The `forensic_archiver` example has been fixed to use `create_archive_streaming()` 
-by default, preventing memory exhaustion for large evidence directories.
+The `archive_tool` example has been fixed to use `create_archive_streaming()` 
+by default, preventing memory exhaustion for large data directories.

@@ -98,7 +98,7 @@ const char* sevenzip_get_error_string(SevenZipErrorCode code);
 ### Rust Crate
 - **Total Lines**: ~2,800 lines of Rust code
 - **Modules**: 5 (ffi, error, archive, encryption, lib)
-- **Examples**: 3 (demo, forensic_archiver, encryption_example)
+- **Examples**: 3 (demo, archive_tool, encryption_example)
 - **Tests**: 26 (12 integration + 14 unit)
 - **Build Time**: < 1 second (incremental)
 
@@ -181,7 +181,7 @@ cargo test
 
 ### Example Code
 - ✅ `examples/demo.rs` - Feature showcase
-- ✅ `examples/forensic_archiver.rs` - CLI tool
+- ✅ `examples/archive_tool.rs` - CLI tool
 - ✅ `examples/encryption_example.rs` - Encryption demo
 
 ## Production Readiness

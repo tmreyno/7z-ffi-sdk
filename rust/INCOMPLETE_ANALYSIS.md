@@ -168,7 +168,7 @@ pub fn sevenzip_compress_resume(...)
 ✅ **USE NOW** - The bindings are production-ready for:
 - Archive creation and extraction
 - AES-256 encryption
-- Forensic evidence archival
+- Large files archival
 - All documented use cases
 
 **Limitations**:
@@ -239,7 +239,7 @@ sz.test_archive("archive.7z", None)?;
 
 ### Workarounds
 All missing features have working workarounds:
-- Large files → Use `forensic_archiver_encrypted.sh`
+- Large files → Use `archive_tool_encrypted.sh`
 - Build automation → `cmake --build build` (one-time setup)
 - Tests → Manual verification works
 
