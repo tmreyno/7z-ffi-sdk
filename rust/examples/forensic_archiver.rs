@@ -43,13 +43,13 @@ fn main() -> Result<(), Error> {
             opts.num_threads = 10; // Use all 10 cores (original setting)
             opts.split_size = 8 * 1024 * 1024 * 1024; // 8GB splits
             opts.password = password.map(|p| p.to_string());
-            // Leave dict_size at 0 to use defaults (256KB for fastest mode)
+            // Leave dict_size at 0 - SDK auto-optimizes all LZMA parameters
 
             println!("Settings:");
             println!("  Threads:     {}", opts.num_threads);
             println!("  Split size:  8 GB");
-            println!("  Dictionary:  Default (64KB for fastest)");
-            println!("  Compression: LZMA2 (Fastest - Original Settings)");
+            println!("  Dictionary:  SDK Auto (level-optimized)");
+            println!("  Compression: LZMA2 (Fastest - SDK Optimized)");
             println!("  Encryption:  {}", if opts.password.is_some() { "AES-256-CBC" } else { "None" });
             println!();
 
