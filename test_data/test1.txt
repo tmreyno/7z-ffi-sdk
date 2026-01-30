@@ -1,0 +1,2 @@
+Hello from 7z FFI SDK!
+This is a test file for demonstrating the extraction functionality.
