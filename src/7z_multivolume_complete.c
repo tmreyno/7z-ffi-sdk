@@ -255,28 +255,94 @@ typedef struct {
     uint64_t bytes_written;
 } MultiVolumeContext;
 
-/* Helper: Write number in 7z variable-length encoding */
+/* Helper: Write number in 7z variable-length encoding (little-endian for bytes after first)
+ * 
+ * 7z uses a variable-length encoding where the first byte indicates how many additional
+ * bytes follow:
+ * - 0x00-0x7F:  1 byte  (7 bits of data)
+ * - 0x80-0xBF:  2 bytes (6 bits in first + 8 bits in second = 14 bits)
+ * - 0xC0-0xDF:  3 bytes (5 bits in first + 16 bits LE = 21 bits)
+ * - 0xE0-0xEF:  4 bytes (4 bits in first + 24 bits LE = 28 bits)
+ * - 0xF0-0xF7:  5 bytes (3 bits in first + 32 bits LE = 35 bits)
+ * - 0xF8-0xFB:  6 bytes (2 bits in first + 40 bits LE = 42 bits)
+ * - 0xFC-0xFD:  7 bytes (1 bit in first + 48 bits LE = 49 bits)
+ * - 0xFE:       8 bytes (56 bits LE)
+ * - 0xFF:       9 bytes (64 bits LE)
+ */
 static void WriteNumber(Byte** buf, uint64_t value) {
     Byte* p = *buf;
-    Byte firstByte = 0;
-    Byte mask = 0x80;
-    int numBytes = 0;
     
-    for (numBytes = 0; numBytes < 8; numBytes++) {
-        if (value < ((uint64_t)1 << (7 * (numBytes + 1)))) {
-            break;
-        }
+    if (value < 0x80) {
+        /* 1 byte: 7 bits */
+        *p++ = (Byte)value;
     }
-    
-    for (int i = 0; i < numBytes; i++) {
-        firstByte |= mask;
-        mask >>= 1;
+    else if (value < ((uint64_t)1 << 14)) {
+        /* 2 bytes: 6 bits in first byte + 8 bits in second = 14 bits */
+        *p++ = (Byte)(0x80 | (value >> 8));
+        *p++ = (Byte)(value & 0xFF);
     }
-    firstByte |= (Byte)(value >> (8 * numBytes));
-    *p++ = firstByte;
-    
-    for (int i = numBytes - 1; i >= 0; i--) {
-        *p++ = (Byte)(value >> (8 * i));
+    else if (value < ((uint64_t)1 << 21)) {
+        /* 3 bytes: 5 bits in first byte + 16 bits little-endian = 21 bits */
+        *p++ = (Byte)(0xC0 | ((value >> 16) & 0x1F));
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+    }
+    else if (value < ((uint64_t)1 << 28)) {
+        /* 4 bytes: 4 bits in first byte + 24 bits little-endian = 28 bits */
+        *p++ = (Byte)(0xE0 | ((value >> 24) & 0x0F));
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+    }
+    else if (value < ((uint64_t)1 << 35)) {
+        /* 5 bytes: 3 bits in first byte + 32 bits little-endian = 35 bits */
+        *p++ = (Byte)(0xF0 | ((value >> 32) & 0x07));
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+        *p++ = (Byte)((value >> 24) & 0xFF);
+    }
+    else if (value < ((uint64_t)1 << 42)) {
+        /* 6 bytes: 2 bits in first byte + 40 bits little-endian = 42 bits */
+        *p++ = (Byte)(0xF8 | ((value >> 40) & 0x03));
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+        *p++ = (Byte)((value >> 24) & 0xFF);
+        *p++ = (Byte)((value >> 32) & 0xFF);
+    }
+    else if (value < ((uint64_t)1 << 49)) {
+        /* 7 bytes: 1 bit in first byte + 48 bits little-endian = 49 bits */
+        *p++ = (Byte)(0xFC | ((value >> 48) & 0x01));
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+        *p++ = (Byte)((value >> 24) & 0xFF);
+        *p++ = (Byte)((value >> 32) & 0xFF);
+        *p++ = (Byte)((value >> 40) & 0xFF);
+    }
+    else if (value < ((uint64_t)1 << 56)) {
+        /* 8 bytes: first byte 0xFE + 56 bits little-endian */
+        *p++ = 0xFE;
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+        *p++ = (Byte)((value >> 24) & 0xFF);
+        *p++ = (Byte)((value >> 32) & 0xFF);
+        *p++ = (Byte)((value >> 40) & 0xFF);
+        *p++ = (Byte)((value >> 48) & 0xFF);
+    }
+    else {
+        /* 9 bytes: first byte 0xFF + 64 bits little-endian */
+        *p++ = 0xFF;
+        *p++ = (Byte)(value & 0xFF);
+        *p++ = (Byte)((value >> 8) & 0xFF);
+        *p++ = (Byte)((value >> 16) & 0xFF);
+        *p++ = (Byte)((value >> 24) & 0xFF);
+        *p++ = (Byte)((value >> 32) & 0xFF);
+        *p++ = (Byte)((value >> 40) & 0xFF);
+        *p++ = (Byte)((value >> 48) & 0xFF);
+        *p++ = (Byte)((value >> 56) & 0xFF);
     }
     
     *buf = p;
@@ -359,7 +425,7 @@ static int write_across_volumes(MultiVolumeContext* ctx, const void* data, size_
  * ============================================================================ */
 
 /* Large read buffer size for optimal I/O throughput */
-#define STREAM_BUFFER_SIZE (4 * 1024 * 1024)  /* 4MB buffer */
+#define STREAM_BUFFER_SIZE (32 * 1024 * 1024)  /* 32MB buffer - better I/O batching */
 
 #if USE_MMAP
 /* Memory-mapped input stream - FASTEST possible I/O */
@@ -572,27 +638,44 @@ static SRes store_file_uncompressed(
     } else {
         /* Fallback: read file in chunks */
         FILE* f = fopen(file_path, "rb");
-        if (!f) return SZ_ERROR_READ;
+        if (!f) {
+            fprintf(stderr, "DEBUG: Cannot open file: %s\n", file_path);
+            return SZ_ERROR_READ;
+        }
         
-        Byte* buffer = (Byte*)malloc(STREAM_BUFFER_SIZE);
+        /* Use 64KB buffer for very large files to reduce memory pressure */
+        size_t buf_size = (file_size > 4ULL * 1024 * 1024 * 1024) ? 
+                          (64 * 1024) : STREAM_BUFFER_SIZE;
+        Byte* buffer = (Byte*)malloc(buf_size);
         if (!buffer) {
             fclose(f);
             return SZ_ERROR_MEM;
         }
         
         uint64_t remaining = file_size;
+        uint64_t total_read = 0;
         while (remaining > 0) {
-            size_t to_read = (remaining < STREAM_BUFFER_SIZE) ? (size_t)remaining : STREAM_BUFFER_SIZE;
+            size_t to_read = (remaining < buf_size) ? (size_t)remaining : buf_size;
             size_t got = fread(buffer, 1, to_read, f);
-            if (got == 0) break;
+            if (got == 0) {
+                if (ferror(f)) {
+                    fprintf(stderr, "DEBUG: Read error at offset %llu\n", total_read);
+                    free(buffer);
+                    fclose(f);
+                    return SZ_ERROR_READ;
+                }
+                break;  /* EOF */
+            }
             
             crc = CrcUpdate(crc, buffer, got);
             if (!write_across_volumes(ctx, buffer, got)) {
+                fprintf(stderr, "DEBUG: Write error at offset %llu\n", total_read);
                 free(buffer);
                 fclose(f);
                 return SZ_ERROR_WRITE;
             }
             remaining -= got;
+            total_read += got;
         }
         free(buffer);
         fclose(f);
@@ -1033,6 +1116,8 @@ static Byte* build_7z_header(
     WriteNumber(&p, 1);  /* Number of pack streams */
     
     *p++ = k7zIdSize;
+    fprintf(stderr, "[DEBUG build_7z_header] total_packed_size = %llu (0x%llX)\n", 
+            (unsigned long long)total_packed_size, (unsigned long long)total_packed_size);
     WriteNumber(&p, total_packed_size);
     
     *p++ = k7zIdEnd;
@@ -1044,19 +1129,33 @@ static Byte* build_7z_header(
     WriteNumber(&p, 1);  /* One folder */
     WriteNumber(&p, 0);  /* Not external */
     WriteNumber(&p, 1);  /* One coder */
-    *p++ = 0x21;  /* Coder flags (1 byte ID, has properties) */
-    *p++ = 0x21;  /* LZMA2 codec ID */
-    *p++ = 1;     /* Properties size = 1 byte */
     
-    /* Write the actual LZMA2 property byte from the first file */
-    Byte prop_byte = 0x01;  /* Default */
+    /* Check if using Copy/Store method (prop_byte == 0 means Copy) */
+    Byte prop_byte = 0x01;  /* Default LZMA2 */
     for (size_t i = 0; i < file_count; i++) {
         if (!files[i].is_dir) {
             prop_byte = files[i].lzma2_prop;
+            fprintf(stderr, "[DEBUG] File %s has lzma2_prop = 0x%02X\n", files[i].name, prop_byte);
             break;
         }
     }
-    *p++ = prop_byte;
+    fprintf(stderr, "[DEBUG] Using prop_byte = 0x%02X, Copy mode = %s\n", prop_byte, prop_byte == 0 ? "YES" : "NO");
+    
+    if (prop_byte == 0) {
+        /* Copy/Store method - no compression 
+         * 7z Copy codec: ID = {0x00} (1 byte), no properties
+         * Coder byte: 0x00 = simple coder, ID size = 0 (inline), no properties
+         * But 7z expects at least 1 byte for codec ID
+         */
+        *p++ = 0x01;  /* Coder: ID size = 1, no NumInStreams/OutStreams, no properties */
+        *p++ = 0x00;  /* Copy codec ID = 0x00 */
+    } else {
+        /* LZMA2 compression */
+        *p++ = 0x21;  /* Coder flags (1 byte ID, has properties) */
+        *p++ = 0x21;  /* LZMA2 codec ID */
+        *p++ = 1;     /* Properties size = 1 byte */
+        *p++ = prop_byte;
+    }
     
     *p++ = k7zIdCodersUnpackSize;
     uint64_t total_unpack = 0;
@@ -1077,9 +1176,11 @@ static Byte* build_7z_header(
         if (!files[i].is_dir) num_files++;
     }
     
+    /* Always emit NumUnpackStream (like working 7z_create.c) */
     *p++ = k7zIdNumUnpackStream;
     WriteNumber(&p, num_files);
     
+    /* Individual file sizes (all but last - last is implied) */
     if (num_files > 1) {
         *p++ = k7zIdSize;
         size_t written = 0;
@@ -1128,8 +1229,9 @@ static Byte* build_7z_header(
     
     /* MTime (Modification Time) */
     *p++ = k7zIdMTime;
-    WriteNumber(&p, file_count * 8 + 1);  /* Size: 1 byte + 8 bytes per file */
+    WriteNumber(&p, file_count * 8 + 2);  /* Size: AllDefined(1) + External(1) + 8 bytes per file */
     *p++ = 1;  /* All defined */
+    *p++ = 0;  /* External = 0 (inline data) */
     for (size_t i = 0; i < file_count; i++) {
         memcpy(p, &files[i].mtime, 8);
         p += 8;
@@ -1137,14 +1239,16 @@ static Byte* build_7z_header(
     
     /* WinAttrib (Windows Attributes) */
     *p++ = k7zIdWinAttrib;
-    WriteNumber(&p, file_count * 4 + 1);  /* Size: 1 byte + 4 bytes per file */
+    WriteNumber(&p, file_count * 4 + 2);  /* Size: AllDefined(1) + External(1) + 4 bytes per file */
     *p++ = 1;  /* All defined */
+    *p++ = 0;  /* External = 0 (inline data) */
     for (size_t i = 0; i < file_count; i++) {
         memcpy(p, &files[i].attrib, 4);
         p += 4;
     }
     
-    *p++ = k7zIdEnd;
+    *p++ = k7zIdEnd;  /* End FilesInfo */
+    *p++ = k7zIdEnd;  /* End Header */
     
     *header_size = p - header;
     return header;
@@ -1346,12 +1450,12 @@ SevenZipErrorCode sevenzip_create_multivolume_7z_complete(
     }
     props.lzmaProps.level = lzma_level;
     
-    /* Multi-threading - let SDK optimize thread distribution */
+    /* Multi-threading - optimized for maximum CPU utilization */
     if (options->num_threads > 0) {
         props.numTotalThreads = options->num_threads;
-        props.numBlockThreads_Max = -1;  /* Let Normalize() decide */
-        props.lzmaProps.numThreads = -1;  /* Let Normalize() decide */
-        props.blockSize = LZMA2_ENC_PROPS_BLOCK_SIZE_AUTO;  /* Auto block size */
+        props.numBlockThreads_Max = options->num_threads;  /* Use all threads for block compression */
+        props.lzmaProps.numThreads = 2;  /* 2 threads per LZMA stream (match finder + range coder) */
+        props.blockSize = (1 << 26);  /* 64 MB blocks - better thread utilization */
     }
     
     /* Override dictionary if user specified one */
@@ -1408,7 +1512,10 @@ SevenZipErrorCode sevenzip_create_multivolume_7z_complete(
         }
     }
     
-    /* Compress each file separately with optimized threading */
+    /* Check if we're in Store (raw copy) mode */
+    int use_store_mode = (level == SEVENZIP_LEVEL_STORE);
+    
+    /* Process each file */
     for (size_t i = 0; i < file_count; i++) {
         MV_FileEntry* file = &files[i];
         
@@ -1419,12 +1526,22 @@ SevenZipErrorCode sevenzip_create_multivolume_7z_complete(
             continue;
         }
         
-        /* Compress file */
         uint32_t crc = 0;
         uint64_t packed_size = 0;
-        SRes res = compress_file_streaming(
-            file->full_path, &ctx, &props,
-            &crc, &packed_size, &file->lzma2_prop);
+        SRes res;
+        
+        if (use_store_mode) {
+            /* FAST PATH: Raw copy without compression (like 7z -mx=0) */
+            file->lzma2_prop = 0;  /* 0 = Copy/Store method */
+            res = store_file_uncompressed(
+                file->full_path, NULL, file->size,
+                &ctx, &crc, &packed_size);
+        } else {
+            /* Normal compression path */
+            res = compress_file_streaming(
+                file->full_path, &ctx, &props,
+                &crc, &packed_size, &file->lzma2_prop);
+        }
         
         if (res != SZ_OK) {
             fprintf(stderr, "Error compressing file: %s\n", file->name);
