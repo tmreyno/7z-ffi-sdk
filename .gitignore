@@ -5,6 +5,8 @@ bin/
 lib/
 target/
 dist/
+lzma_test/
+
 
 # IDE files
 .vscode/
