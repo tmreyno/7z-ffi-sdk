@@ -64,14 +64,14 @@ int main() {
 #### Option A: From Local Path
 ```toml
 [dependencies]
-seven-zip = { path = "/Users/terryreynolds/7z-ffi-sdk/rust" }
+seven-zip = { path = "/path/to/7z-ffi-sdk/rust" }
 ```
 
 #### Option B: Copy to Your Project
 ```bash
 # Copy the rust directory to your project
-cp -r /Users/terryreynolds/7z-ffi-sdk/rust ./seven-zip
-cp -r /Users/terryreynolds/7z-ffi-sdk/build ./seven-zip/
+cp -r /path/to/7z-ffi-sdk/rust ./seven-zip
+cp -r /path/to/7z-ffi-sdk/build ./seven-zip/
 ```
 
 Then in `Cargo.toml`:
@@ -174,7 +174,7 @@ fn advanced_usage() -> Result<(), Box<dyn std::error::Error>> {
 
 ### C Examples
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 # Forensic archiver
 ./build/examples/forensic_archiver compress output.7z /path/to/files --password
@@ -188,7 +188,7 @@ cd /Users/terryreynolds/7z-ffi-sdk
 
 ### Rust Examples
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk/rust
+cd /path/to/7z-ffi-sdk/rust
 
 # Feature demonstration (all features)
 cargo run --release --example feature_demo
@@ -207,14 +207,14 @@ cargo run --release --example demo
 
 ### C Tests
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 ./build/tests/test_compress
 ./build/tests/test_extract
 ```
 
 ### Rust Tests
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk/rust
+cd /path/to/7z-ffi-sdk/rust
 
 # All tests
 cargo test --release
@@ -231,7 +231,7 @@ cargo test --release --test integration_tests
 ### Creating a Release Package
 
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 # Create distribution directory
 mkdir -p dist/lib dist/include dist/examples
@@ -257,8 +257,8 @@ tar czf 7z-ffi-sdk-v1.2.0-macos-arm64.tar.gz dist/
 
 1. **Copy the crate**:
    ```bash
-   cp -r /Users/terryreynolds/7z-ffi-sdk/rust /your/project/deps/seven-zip
-   cp -r /Users/terryreynolds/7z-ffi-sdk/build /your/project/deps/seven-zip/
+   cp -r /path/to/7z-ffi-sdk/rust /your/project/deps/seven-zip
+   cp -r /path/to/7z-ffi-sdk/build /your/project/deps/seven-zip/
    ```
 
 2. **Add to Cargo.toml**:

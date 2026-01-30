@@ -134,7 +134,7 @@ Total Tests:  10
 # 1. Compress and encrypt the evidence directory
 ./forensic_archiver_encrypted.sh compress \
     evidence.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data/1.Evidence" \
+    "/path/to/source/files" \
     --split 8g \
     --threads 8 \
     --password
@@ -250,7 +250,7 @@ forensic_archiver_encrypted.sh extract <input.7z.enc> <output_dir> [options]
 ### 82GB Estimate
 
 ```
-Directory: /Users/terryreynolds/1827-1001 Case With Data/1.Evidence
+Directory: /path/to/source/files
 Size: 82 GB
 
 Estimated Time:
@@ -339,7 +339,7 @@ int sevenzip_verify_password(
 # Compress and encrypt 82GB Evidence directory
 ./forensic_archiver_encrypted.sh compress \
     evidence.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data/1.Evidence" \
+    "/path/to/source/files" \
     --split 8g \
     --threads 8 \
     --password

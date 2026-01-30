@@ -109,11 +109,11 @@ A complete command-line tool ready for forensic evidence compression:
 ### Compress 82GB Evidence Directory
 
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 ./build/examples/forensic_archiver compress \
-    Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \
@@ -125,7 +125,7 @@ cd /Users/terryreynolds/7z-ffi-sdk
 ```
 Forensic Evidence Archiver - Compression
 ==========================================
-Archive:     Evidence_Case1827.7z
+Archive:     example_archive.7z
 Input files: 1
 Level:       5 (normal)
 Split size:  8.00 GB
@@ -144,13 +144,13 @@ Starting compression...
   Total time: 62m 45s
 
 Split archive created. To extract:
-  ./build/examples/forensic_archiver extract Evidence_Case1827.7z.001 /output/dir
+  ./build/examples/forensic_archiver extract example_archive.7z.001 /output/dir
 ```
 
 ### Extract Split Archive
 
 ```bash
-./build/examples/forensic_archiver extract Evidence_Case1827.7z.001 /output
+./build/examples/forensic_archiver extract example_archive.7z.001 /output
 ```
 
 The tool automatically detects and opens all volume files (`.001`, `.002`, etc.)
@@ -161,7 +161,7 @@ If compression is interrupted (Ctrl+C, power loss, etc.):
 
 ```bash
 # Simply run the same command again with --resume
-./build/examples/forensic_archiver compress Evidence_Case1827.7z /evidence \
+./build/examples/forensic_archiver compress example_archive.7z /evidence \
     --split 8g \
     --level 5 \
     --threads 8 \
@@ -198,17 +198,17 @@ Input File → ChunkInStream (64MB chunks) → LZMA2 Encoder → SplitOutStream 
 ### Split Volume Format
 
 ```
-Evidence_Case1827.7z.001  (8.00 GB) - First volume
-Evidence_Case1827.7z.002  (8.00 GB) - Second volume
-Evidence_Case1827.7z.003  (8.00 GB) - Third volume
+example_archive.7z.001  (8.00 GB) - First volume
+example_archive.7z.002  (8.00 GB) - Second volume
+example_archive.7z.003  (8.00 GB) - Third volume
 ...
-Evidence_Case1827.7z.010  (2.15 GB) - Last volume (partial)
+example_archive.7z.010  (2.15 GB) - Last volume (partial)
 ```
 
 ### Checkpoint File Format
 
 ```
-Evidence_Case1827.7z.checkpoint
+example_archive.7z.checkpoint
 ```
 
 Contains:
@@ -355,8 +355,8 @@ typedef void (*SevenZipBytesProgressCallback)(
 ### Phase 4: Production Testing
 ```bash
 # Finally test with full 82GB Evidence directory
-./build/examples/forensic_archiver compress Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+./build/examples/forensic_archiver compress example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \

@@ -9,7 +9,7 @@
 ```bash
 ./forensic_archiver_encrypted.sh compress \
     evidence.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data/1.Evidence" \
+    "/path/to/source/files" \
     --split 8g \
     --threads 8 \
     --password

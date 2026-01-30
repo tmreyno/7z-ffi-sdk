@@ -156,7 +156,7 @@ Status: ✅ PRODUCTION READY
 ```bash
 # Archive 82GB of digital evidence with encryption
 ./forensic_archiver_encrypted.sh compress case_2026_001.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data/1.Evidence" \
+    "/path/to/source/files" \
     --split 8g --threads 8 --password
 
 # Result: ~10 encrypted 8GB volumes

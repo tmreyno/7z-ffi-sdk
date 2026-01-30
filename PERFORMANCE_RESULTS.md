@@ -1,7 +1,7 @@
 # Performance Results - Forensic Archiver vs 7-Zip
 
 ## Test Dataset
-- **Path**: `/Users/terryreynolds/1827-1001 Case With Data /1.Evidence`
+- **Path**: `/path/to/source/files`
 - **Size**: 82.3 GB (88,450,180,042 bytes)
 - **Files**: 171 files, 68 folders
 - **Type**: Forensic evidence (E01 disk images, memory dumps, PST files, documents)

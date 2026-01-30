@@ -243,12 +243,12 @@ typedef void (*SevenZipBytesProgressCallback)(
 ## Usage Example for 82GB Evidence
 
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 # Compress evidence directory
 ./build/examples/forensic_archiver compress \
-    Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \
@@ -352,14 +352,14 @@ cd /Users/terryreynolds/7z-ffi-sdk
 
 5. 🔄 **Test with 82GB Evidence** - Production test
    ```bash
-   ./build/examples/forensic_archiver compress Evidence_Case1827.7z \
-       "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+   ./build/examples/forensic_archiver compress example_archive.7z \
+       "/path/to/source/files" \
        --split 8g --level 5 --threads 8 --resume
    ```
 
 6. 🔄 **Test extraction** - Verify multi-volume extraction
    ```bash
-   ./build/examples/forensic_archiver extract Evidence_Case1827.7z.001 /tmp/verify
+   ./build/examples/forensic_archiver extract example_archive.7z.001 /tmp/verify
    ```
 
 ### Short-term Enhancements

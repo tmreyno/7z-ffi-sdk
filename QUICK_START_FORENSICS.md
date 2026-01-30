@@ -3,15 +3,15 @@
 ## 🚀 TL;DR - Compress Your 82GB Evidence Right Now
 
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 # Make sure it's built
 cmake --build build
 
 # Compress your evidence (this will take 60-75 minutes)
 ./build/examples/forensic_archiver compress \
-    Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \
@@ -32,16 +32,16 @@ That's it! The tool will:
 
 **Output files:**
 ```
-Evidence_Case1827.7z.001    8.00 GB
-Evidence_Case1827.7z.002    8.00 GB
-Evidence_Case1827.7z.003    8.00 GB
-Evidence_Case1827.7z.004    8.00 GB
-Evidence_Case1827.7z.005    8.00 GB
-Evidence_Case1827.7z.006    8.00 GB
-Evidence_Case1827.7z.007    8.00 GB
-Evidence_Case1827.7z.008    8.00 GB
-Evidence_Case1827.7z.009    8.00 GB
-Evidence_Case1827.7z.010    2.15 GB  (last volume)
+example_archive.7z.001    8.00 GB
+example_archive.7z.002    8.00 GB
+example_archive.7z.003    8.00 GB
+example_archive.7z.004    8.00 GB
+example_archive.7z.005    8.00 GB
+example_archive.7z.006    8.00 GB
+example_archive.7z.007    8.00 GB
+example_archive.7z.008    8.00 GB
+example_archive.7z.009    8.00 GB
+example_archive.7z.010    2.15 GB  (last volume)
 ```
 
 Total: **~74 GB** compressed (depending on file types)
@@ -55,7 +55,7 @@ You'll see progress like this:
 ```
 Forensic Evidence Archiver - Compression
 ==========================================
-Archive:     Evidence_Case1827.7z
+Archive:     example_archive.7z
 Input files: 1
 Level:       5 (normal)
 Split size:  8.00 GB
@@ -80,8 +80,8 @@ Just run the **exact same command** again:
 
 ```bash
 ./build/examples/forensic_archiver compress \
-    Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \
@@ -89,7 +89,7 @@ Just run the **exact same command** again:
 ```
 
 The tool will:
-1. Load `Evidence_Case1827.7z.checkpoint`
+1. Load `example_archive.7z.checkpoint`
 2. Skip already-compressed files
 3. Resume from where it left off
 4. Continue compression
@@ -100,7 +100,7 @@ The tool will:
 
 ```bash
 ./build/examples/forensic_archiver extract \
-    Evidence_Case1827.7z.001 \
+    example_archive.7z.001 \
     /path/to/extract/to
 ```
 
@@ -206,7 +206,7 @@ The tool understands these formats:
 ### "Command not found"
 Make sure you built the project:
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 cmake --build build
 ```
 
@@ -216,13 +216,13 @@ You need at least 82 GB free for the compressed archive.
 ### "Cannot open input file"
 Check the path has spaces - use quotes:
 ```bash
-"/Users/terryreynolds/1827-1001 Case With Data /1.Evidence"
+"/path/to/source/files"
 ```
 
 ### "Checkpoint file corrupt"
 Delete the checkpoint and restart:
 ```bash
-rm Evidence_Case1827.7z.checkpoint
+rm example_archive.7z.checkpoint
 # Then run compress command again
 ```
 
@@ -259,20 +259,20 @@ The 49 GB file will take ~35-40 minutes alone.
 ### Verify the archive
 ```bash
 # Using system 7z tool
-7z t Evidence_Case1827.7z.001
+7z t example_archive.7z.001
 ```
 
 ### Calculate checksums
 ```bash
 # SHA256 of all volumes
-shasum -a 256 Evidence_Case1827.7z.*
+shasum -a 256 example_archive.7z.*
 ```
 
 ### Transfer to storage
 All volumes must be transferred together:
 ```bash
 # Example: rsync to remote storage
-rsync -avP Evidence_Case1827.7z.* user@server:/evidence/
+rsync -avP example_archive.7z.* user@server:/evidence/
 ```
 
 ---
@@ -314,7 +314,7 @@ so compression ratios won't be as high as text/uncompressed data.
 
 4. **Extract and verify:**
    ```bash
-   ./build/examples/forensic_archiver extract Evidence_Case1827.7z.001 /tmp/verify
+   ./build/examples/forensic_archiver extract example_archive.7z.001 /tmp/verify
    # Compare checksums
    ```
 
@@ -345,11 +345,11 @@ Watch the progress bar and "Current" file. Speed should be 15-25 MB/s.
 ## Ready to Go!
 
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 ./build/examples/forensic_archiver compress \
-    Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    example_archive.7z \
+    "/path/to/source/files" \
     --split 8g \
     --level 5 \
     --threads 8 \

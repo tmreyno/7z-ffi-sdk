@@ -16,7 +16,7 @@ The 7z FFI SDK is a complete C/C++ wrapper around the LZMA SDK (7-Zip) designed 
 ## 📍 Project Location
 
 ```
-/Users/terryreynolds/7z-ffi-sdk/
+/path/to/7z-ffi-sdk/
 ```
 
 ## ✅ What's Working
@@ -163,7 +163,7 @@ const char* sevenzip_get_error_message(SevenZipErrorCode error_code);
 
 ### Build
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 mkdir build && cd build
 cmake ..
 cmake --build . --config Release

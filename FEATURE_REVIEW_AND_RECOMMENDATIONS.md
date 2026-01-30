@@ -595,7 +595,7 @@ cargo test
 # Run the full 82GB test
 ./build/examples/forensic_archiver compress \
     TestEvidence.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    "/path/to/source/files" \
     --split 8g --level 5 --threads 8 --resume
 
 # Document results

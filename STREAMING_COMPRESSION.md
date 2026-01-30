@@ -231,7 +231,7 @@ sevenzip_create_7z_streaming(
 
 ## Real-World Example: 82GB Evidence Directory
 
-**Scenario:** Compress `/Users/terryreynolds/1827-1001 Case With Data /1.Evidence` (82 GB, 171 files)
+**Scenario:** Compress `/path/to/source/files` (82 GB, 171 files)
 
 **Hardware:**
 - CPU: 10-core Apple Silicon
@@ -240,11 +240,11 @@ sevenzip_create_7z_streaming(
 
 ### Command:
 ```bash
-cd /Users/terryreynolds/7z-ffi-sdk
+cd /path/to/7z-ffi-sdk
 
 ./build/examples/example_stream_compress \
-    /Users/terryreynolds/Evidence_Case1827.7z \
-    "/Users/terryreynolds/1827-1001 Case With Data /1.Evidence" \
+    /tmp/archive.7z \
+    "/path/to/source/files" \
     --split 8589934592 \
     --level 5 \
     --threads 8 \
@@ -256,16 +256,16 @@ cd /Users/terryreynolds/7z-ffi-sdk
 - **Output:** 9-11 volume files (8GB each)
 - **Final Size:** ~70-75 GB (forensic images don't compress much)
 - **Split Files:** 
-  - `Evidence_Case1827.7z.001` (8 GB)
-  - `Evidence_Case1827.7z.002` (8 GB)
+  - `example_archive.7z.001` (8 GB)
+  - `example_archive.7z.002` (8 GB)
   - ...
-  - `Evidence_Case1827.7z.010` (~2-3 GB)
+  - `example_archive.7z.010` (~2-3 GB)
 
 ### Progress Output:
 ```
 7z Streaming Compression
 ========================
-Archive: /Users/terryreynolds/Evidence_Case1827.7z
+Archive: /tmp/archive.7z
 Input files: 1
 Compression level: 5
 Threads: 8
@@ -281,11 +281,11 @@ Compressing...
 ✓ Compression completed successfully!
 
 Split archive created. Files:
-  Evidence_Case1827.7z.001
-  Evidence_Case1827.7z.002
+  example_archive.7z.001
+  example_archive.7z.002
   ...
 
-To extract, use: 7z x Evidence_Case1827.7z.001
+To extract, use: 7z x example_archive.7z.001
 ```
 
 ---
