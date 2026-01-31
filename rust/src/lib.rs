@@ -9,9 +9,11 @@
 //! - **List** archive contents
 //! - **Compress** single files or directories
 //! - **Encrypt** archives with AES-256-CBC
-//! - **Split** archives for multi-volume support
+//! - **Split** archives for multi-volume support (NEW!)
+//! - **Raw LZMA/LZMA2** compression (.lzma and .xz files) (NEW!)
 //! - **Resume** interrupted compressions
 //! - **Test** archive integrity
+//! - **Enhanced error reporting** with context and suggestions (NEW!)
 //!
 //! ## Features
 //!
@@ -149,6 +151,7 @@
 //! ## Modules
 //!
 //! - [`archive`] - High-level archive operations
+//! - [`advanced`] - Split archives, raw LZMA, enhanced error reporting (NEW!)
 //! - [`encryption`] - AES-256 encryption (C library backend)
 //! - [`encryption_native`] - AES-256 encryption (pure Rust, recommended)
 //! - [`error`] - Error types and result handling
@@ -163,6 +166,7 @@ mod ffi;
 // Public modules
 pub mod error;
 pub mod archive;
+pub mod advanced;
 pub mod encryption;
 pub mod encryption_native;
 

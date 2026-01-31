@@ -670,3 +670,153 @@ fn test_streaming_with_password() {
     assert_eq!(content, "Secret streaming data");
 }
 
+// ===== NEW SMART FEATURE TESTS =====
+
+#[test]
+fn test_incompressible_data_detection() {
+    use rand::RngCore;
+    
+    let temp = TempDir::new().unwrap();
+    let sz = SevenZip::new().unwrap();
+    
+    // Generate 1MB of random (incompressible) data
+    let mut rng = rand::thread_rng();
+    let mut data = vec![0u8; 1024 * 1024];
+    rng.fill_bytes(&mut data);
+    
+    let test_file = temp.path().join("random.dat");
+    fs::write(&test_file, &data).unwrap();
+    
+    let archive_path = temp.path().join("test.7z");
+    
+    // Test without auto-detection (should be slow)
+    let start = std::time::Instant::now();
+    sz.create_archive(
+        archive_path.to_str().unwrap(),
+        &[test_file.to_str().unwrap()],
+        CompressionLevel::Normal,
+        None,
+    ).unwrap();
+    let duration_normal = start.elapsed();
+    
+    // Test with auto-detection (should be fast)
+    let archive_path2 = temp.path().join("test2.7z");
+    let mut opts = CompressOptions::default();
+    opts.auto_detect_incompressible = true;
+    
+    let start = std::time::Instant::now();
+    sz.create_archive(
+        archive_path2.to_str().unwrap(),
+        &[test_file.to_str().unwrap()],
+        CompressionLevel::Normal,
+        Some(&opts),
+    ).unwrap();
+    let duration_auto = start.elapsed();
+    
+    println!("Normal compression: {:?}", duration_normal);
+    println!("Auto-detect: {:?}", duration_auto);
+    
+    // Auto-detect should be significantly faster (at least 2x)
+    assert!(duration_auto < duration_normal / 2,
+        "Auto-detect not faster: {:?} vs {:?}", duration_auto, duration_normal);
+}
+
+#[test]
+fn test_smart_threading() {
+    let temp = TempDir::new().unwrap();
+    
+    // Create small file (<1MB)
+    let small_file = temp.path().join("small.txt");
+    fs::write(&small_file, "x".repeat(500_000)).unwrap();
+    
+    // Small file should get 1 thread
+    let small_opts = CompressOptions::auto_tuned(&[small_file.to_str().unwrap()]).unwrap();
+    assert_eq!(small_opts.num_threads, 1, "Small file should use 1 thread");
+    assert!(small_opts.auto_detect_incompressible, "Should enable auto-detect by default");
+}
+
+#[test]
+fn test_encrypted_convenience_method() {
+    let temp = TempDir::new().unwrap();
+    let sz = SevenZip::new().unwrap();
+    
+    let test_file = temp.path().join("secret.txt");
+    fs::write(&test_file, "Secret data").unwrap();
+    
+    let archive_path = temp.path().join("encrypted.7z");
+    
+    // Use convenience method
+    sz.create_encrypted_archive(
+        archive_path.to_str().unwrap(),
+        &[test_file.to_str().unwrap()],
+        "TestPassword123",
+        CompressionLevel::Normal,
+    ).unwrap();
+    
+    assert!(archive_path.exists());
+    
+    // Extract with correct password
+    let extract_dir = temp.path().join("extracted");
+    fs::create_dir(&extract_dir).unwrap();
+    
+    let result = sz.extract_with_password(
+        archive_path.to_str().unwrap(),
+        extract_dir.to_str().unwrap(),
+        Some("TestPassword123"),
+        None,
+    );
+    
+    assert!(result.is_ok(), "Should extract with correct password");
+    let extracted = extract_dir.join("secret.txt");
+    assert!(extracted.exists());
+    let content = fs::read_to_string(extracted).unwrap();
+    assert_eq!(content, "Secret data");
+}
+
+#[test]
+fn test_smart_archive_convenience() {
+    let temp = TempDir::new().unwrap();
+    let sz = SevenZip::new().unwrap();
+    
+    let test_file = temp.path().join("data.txt");
+    fs::write(&test_file, "Test data for smart archive").unwrap();
+    
+    let archive_path = temp.path().join("smart.7z");
+    
+    // Use smart defaults
+    sz.create_smart_archive(
+        archive_path.to_str().unwrap(),
+        &[test_file.to_str().unwrap()],
+        CompressionLevel::Normal,
+    ).unwrap();
+    
+    assert!(archive_path.exists());
+    
+    // Extract and verify
+    let extract_dir = temp.path().join("extracted");
+    fs::create_dir(&extract_dir).unwrap();
+    
+    sz.extract(
+        archive_path.to_str().unwrap(),
+        extract_dir.to_str().unwrap(),
+    ).unwrap();
+    
+    let extracted = extract_dir.join("data.txt");
+    assert!(extracted.exists());
+    let content = fs::read_to_string(extracted).unwrap();
+    assert_eq!(content, "Test data for smart archive");
+}
+
+#[test]
+fn test_compressoptions_builder_pattern() {
+    let opts = CompressOptions::default()
+        .with_threads(4)
+        .with_password("test123".to_string())
+        .with_auto_detect(true);
+    
+    assert_eq!(opts.num_threads, 4);
+    assert_eq!(opts.password, Some("test123".to_string()));
+    assert_eq!(opts.auto_detect_incompressible, true);
+}
+
+

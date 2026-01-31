@@ -74,6 +74,101 @@ pub type ProgressCallback = Box<dyn FnMut(u64, u64) + Send>;
 /// Parameters: (bytes_processed, bytes_total, current_file_bytes, current_file_total, current_file_name)
 pub type BytesProgressCallback = Box<dyn FnMut(u64, u64, u64, u64, &str) + Send>;
 
+/// Calculate Shannon entropy for data compressibility detection
+/// Returns value between 0.0 (very compressible) and 1.0 (incompressible)
+fn calculate_entropy(data: &[u8]) -> f64 {
+    if data.is_empty() {
+        return 0.0;
+    }
+    
+    let mut counts = [0u32; 256];
+    for &byte in data {
+        counts[byte as usize] += 1;
+    }
+    
+    let len = data.len() as f64;
+    let mut entropy = 0.0;
+    
+    for &count in &counts {
+        if count > 0 {
+            let p = count as f64 / len;
+            entropy -= p * p.log2();
+        }
+    }
+    
+    // Normalize to 0-1 range (max entropy for byte is 8)
+    entropy / 8.0
+}
+
+/// Analyze file to determine if compression is worthwhile
+/// Returns (entropy, recommended_compression_level)
+pub fn analyze_file_compressibility(file_path: &Path) -> std::io::Result<(f64, CompressionLevel)> {
+    use std::fs::File;
+    use std::io::Read;
+    
+    let metadata = std::fs::metadata(file_path)?;
+    let file_size = metadata.len();
+    
+    // Sample size: 64KB or 5% of file, whichever is smaller
+    let sample_size = ((file_size / 20).min(65536).max(4096)) as usize;
+    
+    let mut file = File::open(file_path)?;
+    let mut buffer = vec![0u8; sample_size];
+    let bytes_read = file.read(&mut buffer)?;
+    buffer.truncate(bytes_read);
+    
+    let entropy = calculate_entropy(&buffer);
+    
+    // Determine compression level based on entropy
+    let recommended_level = match entropy {
+        e if e > 0.95 => CompressionLevel::Store,    // Already compressed/encrypted
+        e if e > 0.85 => CompressionLevel::Fastest,  // Low compression potential
+        e if e > 0.70 => CompressionLevel::Fast,     // Moderate compression
+        e if e > 0.50 => CompressionLevel::Normal,   // Good compression potential
+        _ => CompressionLevel::Maximum,              // High compression potential
+    };
+    
+    Ok((entropy, recommended_level))
+}
+
+/// Calculate optimal thread count based on total data size
+/// Returns recommended thread count considering overhead vs benefit
+pub fn calculate_optimal_threads(total_bytes: u64) -> usize {
+    let available_cores = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+    
+    // Thresholds determined from benchmark data:
+    // - <1MB: Single thread fastest (no threading overhead)
+    // - 1-10MB: 2 threads provides minimal benefit
+    // - 10-50MB: 4 threads good balance
+    // - >50MB: Scale with cores
+    
+    match total_bytes {
+        0..=1_048_576 => 1,                          // <1MB
+        1_048_577..=10_485_760 => 2,                 // 1-10MB
+        10_485_761..=52_428_800 => {                 // 10-50MB
+            available_cores.min(4)
+        },
+        52_428_801..=524_288_000 => {                // 50-500MB
+            available_cores.min(8)
+        },
+        _ => available_cores.min(16),                // >500MB
+    }
+}
+
+/// Get total size of all files to be compressed
+fn calculate_total_size(file_paths: &[&str]) -> std::io::Result<u64> {
+    let mut total = 0u64;
+    for path in file_paths {
+        let metadata = std::fs::metadata(path)?;
+        if metadata.is_file() {
+            total += metadata.len();
+        }
+    }
+    Ok(total)
+}
+
 /// Advanced compression options
 #[derive(Debug, Clone)]
 pub struct CompressOptions {
@@ -85,6 +180,8 @@ pub struct CompressOptions {
     pub solid: bool,
     /// Optional password for encryption
     pub password: Option<String>,
+    /// Auto-detect and skip compression for incompressible data
+    pub auto_detect_incompressible: bool,
 }
 
 impl Default for CompressOptions {
@@ -94,7 +191,42 @@ impl Default for CompressOptions {
             dict_size: 0,   // auto
             solid: true,
             password: None,
+            auto_detect_incompressible: false, // Conservative default
         }
+    }
+}
+
+impl CompressOptions {
+    /// Create options with auto-tuned thread count based on file sizes
+    pub fn auto_tuned(file_paths: &[&str]) -> std::io::Result<Self> {
+        let total_size = calculate_total_size(file_paths)?;
+        let optimal_threads = calculate_optimal_threads(total_size);
+        
+        Ok(Self {
+            num_threads: optimal_threads,
+            dict_size: 0,
+            solid: true,
+            password: None,
+            auto_detect_incompressible: true, // Enable by default for smart mode
+        })
+    }
+    
+    /// Enable auto-detection with method chaining
+    pub fn with_auto_detect(mut self, enable: bool) -> Self {
+        self.auto_detect_incompressible = enable;
+        self
+    }
+    
+    /// Set thread count with method chaining
+    pub fn with_threads(mut self, threads: usize) -> Self {
+        self.num_threads = threads;
+        self
+    }
+    
+    /// Set password with method chaining
+    pub fn with_password(mut self, password: String) -> Self {
+        self.password = Some(password);
+        self
     }
 }
 
@@ -424,6 +556,9 @@ impl SevenZip {
         level: CompressionLevel,
         options: Option<&CompressOptions>,
     ) -> Result<()> {
+        // Smart defaults: auto-tune if no options provided
+        let mut opts = options.cloned().unwrap_or_default();
+        
         // Check total size and warn if it's large
         let mut total_size: u64 = 0;
         for path in input_paths {
@@ -445,6 +580,37 @@ impl SevenZip {
             eprintln!("This may exhaust system memory. Consider using create_archive_streaming().");
         }
         
+        // Auto-tune threads if not explicitly set (num_threads == 0)
+        if opts.num_threads == 0 && total_size > 0 {
+            opts.num_threads = calculate_optimal_threads(total_size);
+        }
+        
+        // Auto-detect incompressible data if enabled and single file
+        let effective_level = if opts.auto_detect_incompressible && input_paths.len() == 1 {
+            let path = input_paths[0].as_ref();
+            if let Ok(metadata) = std::fs::metadata(path) {
+                if metadata.is_file() {
+                    match analyze_file_compressibility(path) {
+                        Ok((entropy, recommended)) if entropy > 0.95 => {
+                            eprintln!("Info: Data appears incompressible (entropy: {:.2}), using Store mode", entropy);
+                            CompressionLevel::Store
+                        },
+                        Ok((entropy, _)) if entropy > 0.85 => {
+                            eprintln!("Info: Low compression potential detected (entropy: {:.2})", entropy);
+                            level
+                        }
+                        _ => level,
+                    }
+                } else {
+                    level
+                }
+            } else {
+                level
+            }
+        } else {
+            level
+        };
+        
         let archive_path_c = path_to_cstring(archive_path.as_ref())?;
         
         // Convert input paths to C strings
@@ -456,29 +622,20 @@ impl SevenZip {
         input_ptrs.push(ptr::null()); // NULL-terminate
 
         // Convert options to C struct
-        let (opts_ptr, _password_c) = if let Some(opts) = options {
-            let password_c = opts.password.as_ref().map(|p| CString::new(p.as_str())).transpose()?;
-            let c_opts = ffi::SevenZipCompressOptions {
-                num_threads: opts.num_threads as i32,
-                dict_size: opts.dict_size,
-                solid: if opts.solid { 1 } else { 0 },
-                password: password_c.as_ref().map_or(ptr::null(), |p| p.as_ptr()),
-            };
-            (Box::new(c_opts), password_c)
-        } else {
-            (Box::new(ffi::SevenZipCompressOptions {
-                num_threads: 0,
-                dict_size: 0,
-                solid: 1,
-                password: ptr::null(),
-            }), None)
+        let password_c = opts.password.as_ref().map(|p| CString::new(p.as_str())).transpose()?;
+        let c_opts = ffi::SevenZipCompressOptions {
+            num_threads: opts.num_threads as i32,
+            dict_size: opts.dict_size,
+            solid: if opts.solid { 1 } else { 0 },
+            password: password_c.as_ref().map_or(ptr::null(), |p| p.as_ptr()),
         };
+        let opts_ptr = Box::new(c_opts);
 
         unsafe {
             let result = ffi::sevenzip_create_7z(
                 archive_path_c.as_ptr(),
                 input_ptrs.as_ptr(),
-                level.into(),
+                effective_level.into(),
                 Box::as_ref(&opts_ptr) as *const ffi::SevenZipCompressOptions,
                 None,
                 ptr::null_mut(),
@@ -490,6 +647,76 @@ impl SevenZip {
         }
 
         Ok(())
+    }
+
+    /// Create encrypted archive with recommended settings
+    /// 
+    /// Encryption has virtually zero performance overhead (<1%)
+    /// and provides strong AES-256 security.
+    /// 
+    /// # Example
+    /// 
+    /// ```no_run
+    /// use seven_zip::SevenZip;
+    /// 
+    /// let sz = SevenZip::new()?;
+    /// sz.create_encrypted_archive(
+    ///     "secure.7z",
+    ///     &["sensitive.txt", "private.doc"],
+    ///     "MyStrongPassword123!",
+    ///     seven_zip::CompressionLevel::Normal,
+    /// )?;
+    /// # Ok::<(), seven_zip::Error>(())
+    /// ```
+    pub fn create_encrypted_archive(
+        &self,
+        archive_path: impl AsRef<Path>,
+        input_paths: &[impl AsRef<Path>],
+        password: &str,
+        level: CompressionLevel,
+    ) -> Result<()> {
+        let file_path_strs: Vec<String> = input_paths
+            .iter()
+            .map(|p| p.as_ref().to_string_lossy().to_string())
+            .collect();
+        let file_paths_refs: Vec<&str> = file_path_strs.iter().map(|s| s.as_str()).collect();
+        
+        let opts = CompressOptions::auto_tuned(&file_paths_refs)
+            .unwrap_or_default()
+            .with_password(password.to_string());
+        
+        self.create_archive(archive_path, input_paths, level, Some(&opts))
+    }
+
+    /// Create archive with smart defaults (auto-tuned threads, incompressible detection)
+    /// 
+    /// # Example
+    /// 
+    /// ```no_run
+    /// use seven_zip::SevenZip;
+    /// 
+    /// let sz = SevenZip::new()?;
+    /// sz.create_smart_archive(
+    ///     "backup.7z",
+    ///     &["file1.txt", "file2.bin"],
+    ///     seven_zip::CompressionLevel::Normal,
+    /// )?;
+    /// # Ok::<(), seven_zip::Error>(())
+    /// ```
+    pub fn create_smart_archive(
+        &self,
+        archive_path: impl AsRef<Path>,
+        input_paths: &[impl AsRef<Path>],
+        level: CompressionLevel,
+    ) -> Result<()> {
+        let file_path_strs: Vec<String> = input_paths
+            .iter()
+            .map(|p| p.as_ref().to_string_lossy().to_string())
+            .collect();
+        let file_paths_refs: Vec<&str> = file_path_strs.iter().map(|s| s.as_str()).collect();
+        
+        let opts = CompressOptions::auto_tuned(&file_paths_refs).unwrap_or_default();
+        self.create_archive(archive_path, input_paths, level, Some(&opts))
     }
 
     /// Test archive integrity

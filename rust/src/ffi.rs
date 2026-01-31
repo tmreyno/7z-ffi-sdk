@@ -328,6 +328,95 @@ extern "C" {
         salt_len: usize,
         iv: *const u8,
     ) -> SevenZipErrorCode;
+
+    // ============================================================================
+    // LZMA/LZMA2 Raw Compression (Missing Functions)
+    // ============================================================================
+    
+    /// Decompress a standalone LZMA file (.lzma)
+    pub fn sevenzip_decompress_lzma(
+        lzma_path: *const c_char,
+        output_path: *const c_char,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+    
+    /// Decompress a standalone LZMA2 file (.xz)
+    pub fn sevenzip_decompress_lzma2(
+        lzma2_path: *const c_char,
+        output_path: *const c_char,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+    
+    /// Compress a file to LZMA format
+    pub fn sevenzip_compress_lzma(
+        input_path: *const c_char,
+        output_path: *const c_char,
+        level: SevenZipCompressionLevel,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+    
+    /// Compress a file to LZMA2 format (.xz)
+    pub fn sevenzip_compress_lzma2(
+        input_path: *const c_char,
+        output_path: *const c_char,
+        level: SevenZipCompressionLevel,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+
+    // ============================================================================
+    // Multi-Volume (Split) Archives (Missing Functions)
+    // ============================================================================
+    
+    /// Create a multi-volume 7z archive (splits into multiple files)
+    pub fn sevenzip_create_multivolume_7z(
+        archive_path: *const c_char,
+        input_paths: *const *const c_char,
+        level: SevenZipCompressionLevel,
+        volume_size: u64,
+        options: *const SevenZipCompressOptions,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+    
+    /// Extract a split/multi-volume archive
+    pub fn sevenzip_extract_split_archive(
+        archive_path: *const c_char,
+        output_dir: *const c_char,
+        password: *const c_char,
+        progress_callback: SevenZipProgressCallback,
+        user_data: *mut c_void,
+    ) -> SevenZipErrorCode;
+
+    // ============================================================================
+    // Enhanced Error Reporting (Missing Functions)
+    // ============================================================================
+    
+    /// Get detailed information about the last error
+    pub fn sevenzip_get_last_error(error_info: *mut SevenZipErrorInfo) -> SevenZipErrorCode;
+    
+    /// Clear the last error information
+    pub fn sevenzip_clear_last_error();
+    
+    /// Get human-readable error message for error code
+    pub fn sevenzip_get_error_string(code: SevenZipErrorCode) -> *const c_char;
+    
+    /// Get library version string
+    pub fn sevenzip_get_version() -> *const c_char;
+}
+
+/// Detailed error information structure
+#[repr(C)]
+#[derive(Debug)]
+pub struct SevenZipErrorInfo {
+    pub code: SevenZipErrorCode,
+    pub message: [c_char; 512],
+    pub file_context: [c_char; 256],
+    pub position: i64,
+    pub suggestion: [c_char; 256],
 }
 
 #[cfg(test)]

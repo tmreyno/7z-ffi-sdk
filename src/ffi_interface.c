@@ -76,3 +76,28 @@ void sevenzip_free_list(SevenZipList* list) {
     
     free(list);
 }
+
+/* Stub implementation that redirects to sevenzip_create_7z */
+SevenZipErrorCode sevenzip_compress(
+    const char* archive_path,
+    const char** input_paths,
+    SevenZipCompressionLevel level,
+    const char* password,
+    SevenZipProgressCallback progress_callback,
+    void* user_data
+) {
+    SevenZipCompressOptions options = {0};
+    options.num_threads = 0;  /* auto */
+    options.dict_size = 0;    /* auto */
+    options.solid = 1;        /* solid archive */
+    options.password = password;
+    
+    return sevenzip_create_7z(
+        archive_path,
+        input_paths,
+        level,
+        &options,
+        progress_callback,
+        user_data
+    );
+}
