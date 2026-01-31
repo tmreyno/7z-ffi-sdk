@@ -1,4 +1,5 @@
 #include "7z_ffi.h"
+#include "7zCrc.h"  // Add CRC header for CrcGenerateTable()
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +14,10 @@ SevenZipErrorCode sevenzip_init(void) {
         return SEVENZIP_OK;
     }
     
-    /* Initialize any global state here */
+    /* Initialize CRC table - CRITICAL: Must be called before any compression operations */
+    CrcGenerateTable();
+    
+    /* Initialize any other global state here */
     
     g_initialized = 1;
     return SEVENZIP_OK;
